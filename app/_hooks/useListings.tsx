@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 export type ListItem = {
   id: string;
@@ -10,6 +10,17 @@ export type ListItem = {
   description: string;
   type: "house" | "land";
   location: string;
+};
+
+// Pure utility to shuffle an array (Fisher-Yates Shuffle)
+// Placed outside the hook to keep it pure
+const shuffle = <T,>(array: T[]): T[] => {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
 };
 
 const useListings = () => {
@@ -62,7 +73,7 @@ const useListings = () => {
     "Exclusive waterfront peninsula offering 300 feet of shoreline frontage and private deep-water dock authorization.",
   ];
 
-  const landPrices = [4800000, 8500000, 12000000, 6200000, 15500000, 9800000];
+  const landPrices = [1500000, 2500000, 3500000, 2000000, 1800000, 3000000];
 
   const locations = [
     "Malibu, CA",
@@ -73,30 +84,46 @@ const useListings = () => {
     "Geneva, Switzerland",
   ];
 
-  // ---------------- IMAGE PATHS ----------------
-
   const housesImages = Array.from({ length: 9 }).map(
     (_, idx) => `/images/houses/house_${idx + 1}.jpg`,
   );
-
   const landImages = Array.from({ length: 6 }).map(
-    (_, idx) => `/images/lands/land_${idx + 1}.jpg`, // Fixed land file naming convention
+    (_, idx) => `/images/lands/land_${idx + 1}.jpg`,
   );
 
-  // ---------------- RANDOMIZATION & MAPPER ----------------
+  // ---------------- STATIC DETEERMINISTIC BASE DATA ----------------
+  // Next.js uses this array to generate stable initial HTML without errors.
+  const baseListings: ListItem[] = useMemo(() => {
+    const houseListings: ListItem[] = housesImages.map((img, idx) => ({
+      id: `house-${idx + 1}`,
+      imgUrl: img,
+      name: houseNames[idx],
+      description: houseDescriptions[idx],
+      price: housePrices[idx],
+      type: "house",
+      location: locations[idx % locations.length],
+    }));
 
-  // Utility to shuffle an array (Fisher-Yates Shuffle)
-  const shuffle = <T,>(array: T[]): T[] => {
-    const arr = [...array];
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-  };
+    const landListings: ListItem[] = landImages.map((img, idx) => ({
+      id: `land-${idx + 1}`,
+      imgUrl: img,
+      name: landNames[idx],
+      description: landDescriptions[idx],
+      price: landPrices[idx],
+      type: "land",
+      location: locations[(idx + 2) % locations.length],
+    }));
 
-  const listings: ListItem[] = useMemo(() => {
-    // Shuffle property attributes for randomness on mount
+    return [...houseListings, ...landListings];
+  }, []);
+
+  // ---------------- STATE FOR LIVE LISTINGS ----------------
+  const [allListings, setAllListings] = useState<ListItem[]>(baseListings);
+
+  // ---------------- CLIENT SIDE SHUFFLE EFFECT ----------------
+  useEffect(() => {
+    // This executes exclusively in the web browser after hydration.
+    // Next.js build servers completely ignore this block.
     const shuffledHouseNames = shuffle(houseNames);
     const shuffledHouseDescs = shuffle(houseDescriptions);
     const shuffledHousePrices = shuffle(housePrices);
@@ -105,7 +132,6 @@ const useListings = () => {
     const shuffledLandDescs = shuffle(landDescriptions);
     const shuffledLandPrices = shuffle(landPrices);
 
-    // Map Houses
     const houseListings: ListItem[] = housesImages.map((img, idx) => ({
       id: `house-${idx + 1}`,
       imgUrl: img,
@@ -116,7 +142,6 @@ const useListings = () => {
       location: locations[idx % locations.length],
     }));
 
-    // Map Lands
     const landListings: ListItem[] = landImages.map((img, idx) => ({
       id: `land-${idx + 1}`,
       imgUrl: img,
@@ -127,21 +152,21 @@ const useListings = () => {
       location: locations[(idx + 2) % locations.length],
     }));
 
-    // Return combined shuffled listings
-    return shuffle([...houseListings, ...landListings]);
+    setAllListings(shuffle([...houseListings, ...landListings]));
   }, []);
 
+  // Derived filtered values update seamlessly whenever allListings updates.
   const houses = useMemo(
-    () => listings.filter((item) => item.type === "house"),
-    [listings],
+    () => allListings.filter((item) => item.type === "house"),
+    [allListings],
   );
   const lands = useMemo(
-    () => listings.filter((item) => item.type === "land"),
-    [listings],
+    () => allListings.filter((item) => item.type === "land"),
+    [allListings],
   );
 
   return {
-    allListings: listings,
+    allListings,
     houses,
     lands,
   };
