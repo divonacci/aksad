@@ -12,6 +12,9 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  images: {
+    remotePatterns: [new URL("https://placehold.co/**/png")],
+  },
 };
 
 export default nextConfig;

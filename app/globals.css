@@ -1,26 +1,112 @@
 @import "tailwindcss";
+@tailwind utilities;
+@custom-variant dark (&:where(.dark, .dark *));
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("./assets/fonts/Plus_Jakarta_Sans/PlusJakartaSans-VariableFont_wght.ttf");
+  font-weight: 100 900;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Plus Jakarta Sans Italic";
+  src: url("./assets/fonts/Plus_Jakarta_Sans/PlusJakartaSans-Italic-VariableFont_wght.ttf");
+  font-weight: 100 900;
+  font-style: italic;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@font-face {
+  font-family: "Playfair Display";
+  src: url("./assets/fonts/Playfair_Display/PlayfairDisplay-VariableFont_wght.ttf");
+  font-weight: 100 900;
+  font-style: normal;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@font-face {
+  font-family: "PlayfairDisplay Italic";
+  src: url("./assets/fonts/Playfair_Display/PlayfairDisplay-Italic-VariableFont_wght.ttf");
+  font-weight: 100 900;
+  font-style: italic;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+@theme {
+  --color-aks-prm: #041023;
+  --color-aks-prm-light: #d6e3ff;
+  --color-aks-l-sec: #e11d48;
+  --color-aks-sec: #e11d48;
+  --color-aks-trt: #108981;
+  --color-aks-ntr: #64748b;
+
+  --color-aks-prm-d: #f43f5e;
+  --color-aks-sec-d: #10b981;
+  --color-aks-trt-d: #38bdf8;
+  --color-aks-ntr-d: #060d17;
+  --font-headline: "Playfair Display";
+  --font-label: "Playfair Display";
+  --font-body: "Plus Jakarta Sans Italic";
+}
+
+@layer theme {
+  .dark {
+    --color-aks-prm-d: #f43f5e;
+    --color-aks-sec-d: #10b981;
+    --color-aks-trt-d: #38bdf8;
+    --color-aks-ntr-d: #060d17;
+    --color-aks-prm: #0a192f;
+  }
+}
+@layer components {
+  .flex-center {
+    @apply flex items-center justify-center;
+  }
+  .hover-lines {
+    @apply relative before:absolute before:-bottom-1 before:left-1/2 before:h-0.5 before:w-0 before:-translate-x-1/2  before:bg-black dark:before:bg-white before:transition-all before:duration-300 before:ease-in-out hover:before:w-full after:absolute after:-top-1 after:left-1/2 after:h-0.5 after:w-0 after:-translate-x-1/2 after:bg-black dark:after:bg-white after:transition-all after:duration-300 after:ease-in-out hover:after:w-full;
+  }
+  .hover-shadows {
+    @apply hover:shadow-2xs;
+  }
+  .sec-btn {
+    @apply bg-aks-l-sec shadow-aks-l-sec dark:bg-[#BC0B3B] text-white shadow-[0px_0px_10px_0.5px] hover:shadow-[0px_0px_10px_1px] dark:shadow-[#BC0B3B] whitespace-nowrap text-xs font-label font-bold;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}
+
+@utility btn {
+  @apply px-3 py-1.5 rounded-md transition-all duration-300;
+
+  &.btn-primary {
+    @apply bg-black text-white;
+  }
+
+  &.btn-secondary {
+    @apply text-black bg-aks-ntr;
+  }
+
+  &.btn-inverted {
+    @apply bg-aks-ntr text-white;
+  }
+
+  &.btn-outlined {
+    @apply text-aks-ntr border border-aks-ntr;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "PlusJakartaSans" sans-serif;
 }
